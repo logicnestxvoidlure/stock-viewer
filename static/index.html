@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>📈 Free Stock Viewer</title>
+    <!-- Lightweight Charts -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js">
+    </script>
     <style>
         /* Reset & Base */
         * {
@@ -53,6 +56,7 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            position: relative;
         }
         .search-box input {
             padding: 10px 16px;
@@ -96,6 +100,7 @@
             display: none;
             position: absolute;
             width: 100%;
+            top: 100%;
             z-index: 10;
         }
         .search-results .result-item {
@@ -226,17 +231,18 @@
             text-align: right;
         }
 
-        /* Chart Canvas */
-        .chart-wrapper {
+        /* Chart Container */
+        .chart-container {
             width: 100%;
-            height: 300px;
+            height: 400px;
             position: relative;
             margin-top: 12px;
+            background: #13171d;
+            border-radius: 8px;
         }
-        #chartCanvas {
+        #chartContainer {
             width: 100%;
             height: 100%;
-            display: block;
         }
 
         /* Time range buttons */
@@ -261,6 +267,32 @@
             color: #fff;
         }
         .range-buttons button.active {
+            border-color: #5a9cff;
+            background: #5a9cff;
+            color: #fff;
+        }
+
+        /* Chart type toggle */
+        .chart-type-toggle {
+            display: flex;
+            gap: 6px;
+            margin-left: 12px;
+        }
+        .chart-type-toggle button {
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid #2d3139;
+            background: transparent;
+            color: #9aa0ae;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chart-type-toggle button:hover {
+            border-color: #5a9cff;
+            color: #fff;
+        }
+        .chart-type-toggle button.active {
             border-color: #5a9cff;
             background: #5a9cff;
             color: #fff;
@@ -393,7 +425,7 @@
         <!-- HEADER -->
         <div class="header">
             <h1>📈 <span>Stock</span> Viewer</h1>
-            <div class="search-box relative">
+            <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search symbol or name..." autocomplete="off" />
                 <button id="searchBtn">Search</button>
                 <div class="search-results" id="searchResults"></div>
@@ -420,18 +452,24 @@
                         </div>
                     </div>
 
-                    <div class="range-buttons" id="rangeButtons">
-                        <button data-range="1d">1D</button>
-                        <button data-range="5d">5D</button>
-                        <button data-range="1mo" class="active">1M</button>
-                        <button data-range="3mo">3M</button>
-                        <button data-range="6mo">6M</button>
-                        <button data-range="1y">1Y</button>
-                        <button data-range="5y">5Y</button>
+                    <div class="flex" style="justify-content:space-between; flex-wrap:wrap;">
+                        <div class="range-buttons" id="rangeButtons">
+                            <button data-range="1d">1D</button>
+                            <button data-range="5d">5D</button>
+                            <button data-range="1mo" class="active">1M</button>
+                            <button data-range="3mo">3M</button>
+                            <button data-range="6mo">6M</button>
+                            <button data-range="1y">1Y</button>
+                            <button data-range="5y">5Y</button>
+                        </div>
+                        <div class="chart-type-toggle" id="chartTypeToggle">
+                            <button data-type="candle" class="active">Candles</button>
+                            <button data-type="line">Line</button>
+                        </div>
                     </div>
 
-                    <div class="chart-wrapper">
-                        <canvas id="chartCanvas"></canvas>
+                    <div class="chart-container">
+                        <div id="chartContainer"></div>
                     </div>
 
                     <div class="quote-details" id="quoteDetails">
@@ -485,9 +523,14 @@
         const state = {
             symbol: 'AAPL',
             range: '1mo',
+            chartType: 'candle', // 'candle' or 'line'
             quoteData: null,
             historyData: null,
             searchResults: [],
+            chart: null,
+            candleSeries: null,
+            lineSeries: null,
+            volumeSeries: null,
         };
 
         // DOM refs
@@ -510,9 +553,9 @@
         const marketCap = $('marketCap');
         const moversList = $('moversList');
         const newsList = $('newsList');
-        const chartCanvas = $('chartCanvas');
-        const ctx = chartCanvas.getContext('2d');
+        const chartContainer = $('chartContainer');
         const rangeButtons = $('rangeButtons');
+        const chartTypeToggle = $('chartTypeToggle');
 
         // ============================================================
         // HELPERS
@@ -597,6 +640,148 @@
         }
 
         // ============================================================
+        // CHART SETUP
+        // ============================================================
+        function initChart() {
+            if (state.chart) {
+                state.chart.remove();
+            }
+
+            state.chart = LightweightCharts.createChart(chartContainer, {
+                layout: {
+                    background: { color: '#13171d' },
+                    textColor: '#9aa0ae',
+                },
+                grid: {
+                    vertLines: { color: '#1e2329' },
+                    horzLines: { color: '#1e2329' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: '#2d3139',
+                },
+                timeScale: {
+                    borderColor: '#2d3139',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+                width: chartContainer.clientWidth,
+                height: 400,
+            });
+
+            // Create candle series
+            state.candleSeries = state.chart.addCandlestickSeries({
+                upColor: '#0ecb81',
+                downColor: '#f6465d',
+                borderUpColor: '#0ecb81',
+                borderDownColor: '#f6465d',
+                wickUpColor: '#0ecb81',
+                wickDownColor: '#f6465d',
+            });
+
+            // Create line series (hidden by default)
+            state.lineSeries = state.chart.addLineSeries({
+                color: '#5a9cff',
+                lineWidth: 2,
+                priceLineVisible: false,
+            });
+            state.lineSeries.applyOptions({
+                visible: false,
+            });
+
+            // Create volume series
+            state.volumeSeries = state.chart.addHistogramSeries({
+                color: '#2d3139',
+                priceFormat: {
+                    type: 'volume',
+                },
+                priceScaleId: 'volume',
+            });
+
+            // Volume scale
+            state.chart.priceScale('volume').applyOptions({
+                scaleMargins: {
+                    top: 0.85,
+                    bottom: 0,
+                },
+                visible: true,
+                borderColor: '#2d3139',
+            });
+
+            // Main scale margins
+            state.chart.priceScale('right').applyOptions({
+                scaleMargins: {
+                    top: 0.05,
+                    bottom: 0.15,
+                },
+            });
+
+            // Fit content
+            state.chart.timeScale().fitContent();
+
+            // Handle resize
+            const resizeObserver = new ResizeObserver(() => {
+                state.chart.applyOptions({
+                    width: chartContainer.clientWidth,
+                });
+            });
+            resizeObserver.observe(chartContainer);
+
+            return state.chart;
+        }
+
+        function updateChart(candles, chartType) {
+            if (!state.chart) {
+                initChart();
+            }
+
+            if (!candles || candles.length === 0) {
+                state.candleSeries.setData([]);
+                state.lineSeries.setData([]);
+                state.volumeSeries.setData([]);
+                return;
+            }
+
+            // Format data for lightweight charts
+            const candleData = candles.map(c => ({
+                time: c.time,
+                open: c.open,
+                high: c.high,
+                low: c.low,
+                close: c.close,
+            }));
+
+            const lineData = candles.map(c => ({
+                time: c.time,
+                value: c.close,
+            }));
+
+            const volumeData = candles.map(c => ({
+                time: c.time,
+                value: c.volume || 0,
+                color: c.close >= c.open ? '#0ecb81' : '#f6465d',
+            }));
+
+            // Update series
+            state.candleSeries.setData(candleData);
+            state.lineSeries.setData(lineData);
+            state.volumeSeries.setData(volumeData);
+
+            // Show/hide based on chart type
+            if (chartType === 'candle') {
+                state.candleSeries.applyOptions({ visible: true });
+                state.lineSeries.applyOptions({ visible: false });
+            } else {
+                state.candleSeries.applyOptions({ visible: false });
+                state.lineSeries.applyOptions({ visible: true });
+            }
+
+            state.chart.timeScale().fitContent();
+        }
+
+        // ============================================================
         // RENDER FUNCTIONS
         // ============================================================
 
@@ -628,94 +813,11 @@
 
         function renderHistory(data) {
             if (!data || data.error || !data.candles || data.candles.length === 0) {
-                drawChart([]);
+                updateChart([], state.chartType);
                 return;
             }
             state.historyData = data;
-            drawChart(data.candles);
-        }
-
-        function drawChart(candles) {
-            const rect = chartCanvas.parentElement.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            const w = rect.width || 600;
-            const h = rect.height || 280;
-
-            chartCanvas.width = w * dpr;
-            chartCanvas.height = h * dpr;
-            chartCanvas.style.width = w + 'px';
-            chartCanvas.style.height = h + 'px';
-            ctx.scale(dpr, dpr);
-
-            const pad = { top: 16, bottom: 24, left: 8, right: 8 };
-            const chartW = w - pad.left - pad.right;
-            const chartH = h - pad.top - pad.bottom;
-
-            ctx.clearRect(0, 0, w, h);
-
-            if (!candles || candles.length < 2) {
-                ctx.fillStyle = '#6c7280';
-                ctx.font = '14px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('No chart data available', w / 2, h / 2);
-                return;
-            }
-
-            const closes = candles.map(c => c.close);
-            const minVal = Math.min(...closes);
-            const maxVal = Math.max(...closes);
-            const range = maxVal - minVal || 1;
-
-            const lineColor = '#5a9cff';
-            const fillColor = 'rgba(90, 156, 255, 0.15)';
-
-            // Draw fill
-            ctx.beginPath();
-            candles.forEach((c, i) => {
-                const x = pad.left + (i / (candles.length - 1)) * chartW;
-                const y = pad.top + chartH - ((c.close - minVal) / range) * chartH;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            const lastX = pad.left + ((candles.length - 1) / (candles.length - 1)) * chartW;
-            ctx.lineTo(lastX, pad.top + chartH);
-            ctx.lineTo(pad.left, pad.top + chartH);
-            ctx.closePath();
-            ctx.fillStyle = fillColor;
-            ctx.fill();
-
-            // Draw line
-            ctx.beginPath();
-            candles.forEach((c, i) => {
-                const x = pad.left + (i / (candles.length - 1)) * chartW;
-                const y = pad.top + chartH - ((c.close - minVal) / range) * chartH;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.strokeStyle = lineColor;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Price labels: first & last
-            ctx.fillStyle = '#9aa0ae';
-            ctx.font = '11px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('$' + candles[0].close.toFixed(2), pad.left + 2, pad.top + 14);
-            ctx.textAlign = 'right';
-            ctx.fillText('$' + candles[candles.length - 1].close.toFixed(2), w - pad.right - 2, pad.top + 14);
-
-            // Volume bars (small)
-            const maxVol = Math.max(...candles.map(c => c.volume || 0)) || 1;
-            const volHeight = 36;
-            candles.forEach((c, i) => {
-                const x = pad.left + (i / (candles.length - 1)) * chartW;
-                const barW = Math.max(2, (chartW / candles.length) * 0.6);
-                const vol = Math.min((c.volume || 0) / maxVol, 1);
-                const barH = vol * volHeight;
-                const y = pad.top + chartH - barH + 2;
-                ctx.fillStyle = (c.close > (c.open || c.close)) ? '#0ecb81' : '#f6465d';
-                ctx.fillRect(x - barW / 2, y, barW, barH);
-            });
+            updateChart(data.candles, state.chartType);
         }
 
         function renderMarketSummary(data) {
@@ -757,7 +859,6 @@
                 `;
             });
             moversList.innerHTML = html;
-            // Click to load symbol
             moversList.querySelectorAll('.mover-item').forEach(el => {
                 el.addEventListener('click', () => {
                     const sym = el.dataset.symbol;
@@ -808,6 +909,11 @@
             rangeButtons.querySelectorAll('button').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.range === state.range);
             });
+
+            // Highlight active chart type
+            chartTypeToggle.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === state.chartType);
+            });
         }
 
         // ============================================================
@@ -852,6 +958,9 @@
         // INIT
         // ============================================================
         async function init() {
+            // Initialize chart
+            initChart();
+
             // Load market summary
             const summary = await fetchMarketSummary();
             renderMarketSummary(summary);
@@ -882,7 +991,24 @@
                     state.range = range;
                     const history = await fetchHistory(state.symbol, range);
                     renderHistory(history);
-                    rangeButtons.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.range === range));
+                    rangeButtons.querySelectorAll('button').forEach(b => b.classList.toggle('active', b
+                        .dataset.range === range));
+                });
+            });
+
+            // Chart type toggle
+            chartTypeToggle.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type;
+                    if (type === state.chartType) return;
+                    state.chartType = type;
+                    chartTypeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b
+                        .dataset.type === type));
+
+                    // Update chart visibility
+                    if (state.historyData && state.historyData.candles) {
+                        updateChart(state.historyData.candles, type);
+                    }
                 });
             });
 
@@ -901,8 +1027,10 @@
 
             // Handle resize for chart
             window.addEventListener('resize', () => {
-                if (state.historyData) {
-                    drawChart(state.historyData.candles || []);
+                if (state.chart) {
+                    state.chart.applyOptions({
+                        width: chartContainer.clientWidth,
+                    });
                 }
             });
         }
