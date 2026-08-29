@@ -1,68 +1,111 @@
-📈 StockPulse — Free Stock Viewer & Real-Time Market Terminal
-StockPulse is a free, fast, and easy-to-use stock market dashboard that brings live market data right to your browser—no credit card, no hidden fees, no paid API keys required.
+# 📈 StockPulse — Free Stock Viewer & Real-Time Market Terminal
 
-Whether you're casually checking how your favorite stocks are doing or digging deeper into price trends, StockPulse has you covered. You can search for any stock, ETF, or crypto pair, view interactive charts, track market movers, save a personal watchlist, and catch up on the latest financial news—all from one clean, dark-themed interface.
+**StockPulse** is a free, lightweight stock market dashboard built for anyone who wants to keep an eye on the markets without dealing with complicated tools or paid API keys.
 
-✨ What You Can Do
-Get real-time and historical stock data — including current price, daily high/low, open, previous close, trading volume, 52-week range, and market cap.
+You can search for stocks, check real-time prices, view historical performance, explore interactive charts, look at key financial metrics, track market movers, build a personal watchlist, and stay up to date with the latest financial news — all from one place.
 
-Choose your time horizon — quickly switch between 1D, 5D, 1M, 3M, 6M, 1Y, 5Y, or MAX views.
+## ✨ Features
 
-Explore interactive charts built with HTML5 Canvas:
+* **Real-Time & Historical Market Data** — View current prices, daily highs and lows, opening prices, previous closes, trading volume, 52-week ranges, market caps, and more.
+* **Multiple Timeframes** — Switch between `1D`, `5D`, `1M`, `3M`, `6M`, `1Y`, `5Y`, and `MAX` to see how a stock has performed over different periods.
+* **Interactive Charts** — Use Area/Line or Candlestick charts to explore price movements. You can also enable an SMA 20 indicator and view trading volume directly on the chart.
+* **Detailed Chart Hovering** — Move your cursor across the chart to see exact OHLCV information for individual points.
+* **Market Overview** — Keep track of major benchmarks and assets such as the S&P 500, Dow Jones, Nasdaq, Russell 2000, Bitcoin, Gold, and Crude Oil.
+* **Quick Search** — Find US and international stocks, ETFs, crypto pairs, and indices with the built-in search and autocomplete.
+* **Market Movers** — Quickly see which stocks are gaining, losing, or getting the most attention through the Gainers, Losers, and Popular tabs.
+* **Watchlist** — Star your favorite stocks and keep them saved automatically in your browser.
+* **Financial News** — Read recent market and stock-specific news without leaving the dashboard.
+* **CSV Export** — Export historical stock data as a CSV file with a single click.
+* **Responsive Dark UI** — StockPulse uses a dark, trading-focused interface designed to work smoothly on both desktop and mobile.
 
-Toggle between Area/Line and Candlestick views.
+---
 
-Add a 20-day Simple Moving Average (SMA) overlay to spot trends.
+## 🚀 Getting Started
 
-See volume as colored histogram bars that match each candle's direction.
+There are a couple of simple ways to run StockPulse locally.
 
-Hover anywhere on the chart to see exact OHLCV (Open, High, Low, Close, Volume) values.
+### Windows
 
-Watch major market indices in the ticker ribbon at the top — S&P 500, Dow Jones, Nasdaq, Russell 2000, Bitcoin, Gold, and Crude Oil.
+If you're on Windows, you can simply run `run.bat`. It will activate the virtual environment and start the application automatically.
 
-Search instantly with autocomplete — works for US and global stocks, ETFs, crypto pairs, and indices.
+### Command Line
 
-Track what's moving the market — with one-click tabs for Top Gainers, Top Losers, and Most Popular stocks.
+You can also start it manually:
 
-Build your watchlist — star your favorite stocks with a single click, and they'll stay saved in your browser (thanks to localStorage).
-
-Read the latest financial news — headlines load automatically and link directly to full articles.
-
-Download data — export historical OHLCV data to CSV with one click.
-
-Enjoy a sleek, trader-friendly interface — dark/OLED aesthetics with neon accents, clean fonts (Plus Jakarta Sans & JetBrains Mono), and a responsive layout that works great on both desktop and mobile.
-
-🚀 How to Get Started
-Option 1: One-Click (Windows)
-Just double-click run.bat in the project folder. It'll handle the virtual environment and launch the server for you.
-
-Option 2: Manual (Command Line)
-bash
-# 1. Go to the project folder
+```bash
 cd /d "%USERPROFILE%\Downloads\StockPulse"
 
-# 2. Activate the virtual environment
 .\venv\Scripts\activate
 
-# 3. Start the app
 python app.py
-Then open your browser and visit:
-👉 http://localhost:5000
+```
 
-🔌 API Endpoints (for the curious)
-GET /api/quote?symbol=AAPL — Get a real-time quote and key metrics for a ticker.
+Once the server starts, open:
 
-GET /api/history?symbol=AAPL&range=1mo&interval=1d — Get historical OHLCV candle data.
+`http://localhost:5000`
 
-GET /api/search?q=apple — Autocomplete ticker suggestions as you type.
+---
 
-GET /api/market-summary — Get major index values and top movers.
+## 🔌 API
 
-GET /api/news?symbol=AAPL — Get recent news articles for a ticker.
+StockPulse also provides a small REST API that the frontend uses to retrieve market information.
 
-🛠️ Built With
-Backend: Python, Flask, Flask-CORS, Requests
+### Quote
 
-Frontend: HTML5, Tailwind CSS, Lucide Icons, and a custom high-performance Canvas chart engine built from scratch
+```http
+GET /api/quote?symbol=AAPL
+```
 
-StockPulse is made for people who want to stay informed without the hassle. No subscriptions. No noise. Just clean, real-time market data at your fingertips.
+Returns the latest price and key information for a stock.
+
+### Historical Data
+
+```http
+GET /api/history?symbol=AAPL&range=1mo&interval=1d
+```
+
+Returns historical OHLCV data that can be used to build price charts.
+
+### Search
+
+```http
+GET /api/search?q=apple
+```
+
+Searches for stocks, ETFs, crypto pairs, and other supported symbols.
+
+### Market Summary
+
+```http
+GET /api/market-summary
+```
+
+Returns major market indexes and current market movers.
+
+### News
+
+```http
+GET /api/news?symbol=AAPL
+```
+
+Returns recent financial news related to the requested ticker.
+
+---
+
+## 🛠️ Built With
+
+### Backend
+
+* Python
+* Flask
+* Flask-CORS
+* Requests
+
+### Frontend
+
+* HTML5
+* Tailwind CSS
+* Lucide Icons
+* Custom HTML5 Canvas chart engine
+
+StockPulse is designed to stay simple: **search a ticker, see the data, understand the market, and move on.**
