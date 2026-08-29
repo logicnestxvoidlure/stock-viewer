@@ -1,1041 +1,2458 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>📈 Free Stock Viewer</title>
-    <!-- Lightweight Charts -->
-    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js">
-    </script>
-    <style>
-        /* Reset & Base */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+```
+<title>Pulse Stock</title>
+
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+
+<style>
+    /* ============================================================
+       PULSE STOCK — BLACK & WHITE THEME
+    ============================================================ */
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #050505;
+        --surface: #0b0b0b;
+        --surface-2: #101010;
+        --surface-3: #151515;
+
+        --border: #242424;
+        --border-light: #303030;
+
+        --text: #f5f5f5;
+        --text-secondary: #a0a0a0;
+        --text-muted: #666666;
+
+        --white: #ffffff;
+        --black: #000000;
+
+        --positive: #ffffff;
+        --negative: #777777;
+    }
+
+    body {
+        font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Roboto,
+            Helvetica,
+            Arial,
+            sans-serif;
+
+        background:
+            radial-gradient(
+                circle at top center,
+                #151515 0%,
+                #080808 35%,
+                #050505 70%
+            );
+
+        color: var(--text);
+        padding: 24px;
+        min-height: 100vh;
+    }
+
+    a {
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    button,
+    input {
+        font-family: inherit;
+    }
+
+    /* ============================================================
+       CONTAINER
+    ============================================================ */
+
+    .container {
+        max-width: 1450px;
+        margin: 0 auto;
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 18px;
+
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+
+        border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .brand-mark {
+        width: 36px;
+        height: 36px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 10px;
+
+        background: var(--white);
+        color: var(--black);
+
+        font-size: 16px;
+        font-weight: 900;
+
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,.08),
+            0 8px 25px rgba(255,255,255,.08);
+    }
+
+    .header h1 {
+        font-size: 25px;
+        font-weight: 700;
+        letter-spacing: -0.8px;
+    }
+
+    .header h1 span {
+        color: #888;
+        font-weight: 500;
+    }
+
+    /* ============================================================
+       SEARCH
+    ============================================================ */
+
+    .search-box {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        position: relative;
+    }
+
+    .search-box input {
+        padding: 11px 15px;
+
+        min-width: 250px;
+
+        border-radius: 9px;
+        border: 1px solid var(--border);
+
+        background: var(--surface-2);
+        color: var(--text);
+
+        font-size: 14px;
+        outline: none;
+
+        transition:
+            border-color .2s,
+            background .2s;
+    }
+
+    .search-box input:hover {
+        border-color: var(--border-light);
+    }
+
+    .search-box input:focus {
+        border-color: #666;
+        background: #121212;
+    }
+
+    .search-box input::placeholder {
+        color: #555;
+    }
+
+    .search-box button {
+        padding: 11px 20px;
+
+        border: 1px solid var(--white);
+        border-radius: 9px;
+
+        background: var(--white);
+        color: var(--black);
+
+        font-weight: 700;
+        font-size: 13px;
+
+        cursor: pointer;
+
+        transition:
+            transform .15s,
+            background .15s;
+    }
+
+    .search-box button:hover {
+        background: #dcdcdc;
+        transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       SEARCH RESULTS
+    ============================================================ */
+
+    .search-results {
+        background: #0d0d0d;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+
+        margin-top: 6px;
+
+        max-height: 240px;
+        overflow-y: auto;
+
+        display: none;
+
+        position: absolute;
+        width: 100%;
+        top: 100%;
+
+        z-index: 50;
+
+        box-shadow: 0 15px 40px rgba(0,0,0,.55);
+    }
+
+    .search-results .result-item {
+        padding: 11px 15px;
+
+        cursor: pointer;
+
+        border-bottom: 1px solid #1b1b1b;
+
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+
+        transition: background .15s;
+    }
+
+    .search-results .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-results .result-item:hover {
+        background: #181818;
+    }
+
+    .search-results .result-item .sym {
+        font-weight: 700;
+        color: var(--white);
+    }
+
+    .search-results .result-item .name {
+        color: #777;
+        font-size: 13px;
+    }
+
+    /* ============================================================
+       MARKET SUMMARY
+    ============================================================ */
+
+    .market-summary {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 12px 25px;
+
+        background: rgba(12,12,12,.9);
+
+        padding: 15px 20px;
+
+        border-radius: 12px;
+        border: 1px solid var(--border);
+
+        margin-bottom: 24px;
+
+        overflow-x: auto;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,.15);
+    }
+
+    .market-summary .index-item {
+        display: flex;
+        align-items: baseline;
+
+        gap: 7px;
+
+        white-space: nowrap;
+
+        font-size: 13px;
+    }
+
+    .market-summary .index-item .label {
+        color: #777;
+    }
+
+    .market-summary .index-item .price {
+        font-weight: 700;
+    }
+
+    .market-summary .index-item .change-positive {
+        color: #fff;
+    }
+
+    .market-summary .index-item .change-negative {
+        color: #777;
+    }
+
+    /* ============================================================
+       GRID
+    ============================================================ */
+
+    .grid {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+        gap: 22px;
+    }
+
+    @media (max-width: 1024px) {
+        .grid {
+            grid-template-columns: 1fr;
         }
+    }
+
+    /* ============================================================
+       CARDS
+    ============================================================ */
+
+    .card {
+        background:
+            linear-gradient(
+                145deg,
+                #101010,
+                #090909
+            );
+
+        border-radius: 14px;
+        border: 1px solid var(--border);
+
+        padding: 20px;
+
+        box-shadow:
+            0 15px 40px rgba(0,0,0,.18);
+
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 1px;
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.14),
+                transparent
+            );
+    }
+
+    .card h2 {
+        font-size: 16px;
+        font-weight: 600;
+
+        margin-bottom: 16px;
+
+        color: #e7e7e7;
+
+        letter-spacing: -.2px;
+    }
+
+    /* ============================================================
+       QUOTE
+    ============================================================ */
+
+    .quote-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        flex-wrap: wrap;
+
+        margin-bottom: 12px;
+    }
+
+    .quote-header .symbol-name {
+        font-size: 22px;
+        font-weight: 750;
+        letter-spacing: -.5px;
+    }
+
+    .quote-header .symbol-name .exchange {
+        font-size: 12px;
+        font-weight: 500;
+
+        color: #777;
+
+        margin-left: 8px;
+
+        padding: 4px 7px;
+
+        border: 1px solid #292929;
+        border-radius: 5px;
+    }
+
+    .quote-header .price-large {
+        font-size: 32px;
+        font-weight: 800;
+
+        letter-spacing: -1px;
+    }
+
+    .quote-header .change-large {
+        font-size: 16px;
+        font-weight: 600;
+
+        margin-left: 10px;
+    }
+
+    .change-positive {
+        color: var(--positive);
+    }
+
+    .change-negative {
+        color: var(--negative);
+    }
+
+    /* ============================================================
+       QUOTE DETAILS
+    ============================================================ */
+
+    .quote-details {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 10px 20px;
+
+        margin-top: 18px;
+
+        padding-top: 18px;
+
+        border-top: 1px solid #1f1f1f;
+
+        font-size: 13px;
+
+        color: #999;
+    }
+
+    .quote-details .label {
+        color: #666;
+    }
+
+    .quote-details .value {
+        font-weight: 600;
+
+        color: #ddd;
+
+        text-align: right;
+    }
+
+    /* ============================================================
+       CHART
+    ============================================================ */
+
+    .chart-container {
+        width: 100%;
+        height: 400px;
+
+        position: relative;
+
+        margin-top: 12px;
+
+        background: #070707;
+
+        border-radius: 10px;
+
+        border: 1px solid #181818;
+
+        overflow: hidden;
+    }
+
+    #chartContainer {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* ============================================================
+       RANGE BUTTONS
+    ============================================================ */
+
+    .range-buttons {
+        display: flex;
+
+        gap: 5px;
+
+        flex-wrap: wrap;
+
+        margin: 12px 0 8px;
+    }
+
+    .range-buttons button {
+        padding: 5px 13px;
+
+        border-radius: 6px;
+
+        border: 1px solid #292929;
+
+        background: #0d0d0d;
+
+        color: #777;
+
+        font-size: 12px;
+
+        cursor: pointer;
+
+        transition: .15s;
+    }
+
+    .range-buttons button:hover {
+        border-color: #555;
+        color: #ddd;
+    }
+
+    .range-buttons button.active {
+        border-color: var(--white);
+        background: var(--white);
+        color: var(--black);
+        font-weight: 700;
+    }
+
+    /* ============================================================
+       CHART TYPE
+    ============================================================ */
+
+    .chart-type-toggle {
+        display: flex;
+
+        gap: 5px;
+
+        margin-left: 12px;
+    }
+
+    .chart-type-toggle button {
+        padding: 5px 12px;
+
+        border-radius: 6px;
+
+        border: 1px solid #292929;
+
+        background: #0d0d0d;
+
+        color: #777;
+
+        font-size: 11px;
+
+        cursor: pointer;
+
+        transition: .15s;
+    }
+
+    .chart-type-toggle button:hover {
+        border-color: #555;
+        color: #ddd;
+    }
+
+    .chart-type-toggle button.active {
+        border-color: #fff;
+
+        background: #fff;
+
+        color: #000;
+
+        font-weight: 700;
+    }
+
+    /* ============================================================
+       MOVERS
+    ============================================================ */
+
+    .movers-list {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 4px;
+
+        max-height: 400px;
+
+        overflow-y: auto;
+    }
+
+    .mover-item {
+        display: flex;
+
+        justify-content: space-between;
+        align-items: center;
+
+        padding: 11px 12px;
+
+        border-radius: 8px;
+
+        cursor: pointer;
+
+        border: 1px solid transparent;
+
+        transition: .15s;
+    }
+
+    .mover-item:hover {
+        background: #151515;
+
+        border-color: #242424;
+    }
+
+    .mover-item .sym {
+        font-weight: 700;
+    }
+
+    .mover-item .name {
+        font-size: 13px;
+
+        color: #666;
+
+        margin-left: 12px;
+
+        flex: 1;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mover-item .price {
+        font-weight: 600;
+
+        margin-right: 16px;
+    }
+
+    .mover-item .change {
+        font-weight: 600;
+
+        min-width: 70px;
+
+        text-align: right;
+    }
+
+    /* ============================================================
+       NEWS
+    ============================================================ */
+
+    .news-list {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 4px;
+    }
+
+    .news-item {
+        padding: 12px 4px;
+
+        border-bottom: 1px solid #1d1d1d;
+    }
+
+    .news-item:last-child {
+        border-bottom: none;
+    }
+
+    .news-item .title {
+        font-weight: 550;
+
+        font-size: 14px;
+
+        line-height: 1.45;
+
+        color: #d8d8d8;
+
+        transition: color .15s;
+
+        cursor: pointer;
+    }
+
+    .news-item .title:hover {
+        color: #fff;
+    }
+
+    .news-item .meta {
+        font-size: 12px;
+
+        color: #555;
+
+        margin-top: 5px;
+    }
+
+    /* ============================================================
+       LOADING / STATUS
+    ============================================================ */
+
+    .loading {
+        color: #555;
+
+        font-size: 13px;
+
+        padding: 12px 0;
+    }
+
+    .error-text {
+        color: #999;
+
+        font-size: 13px;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+
+    .footer {
+        margin-top: 40px;
+
+        padding-top: 18px;
+
+        border-top: 1px solid var(--border);
+
+        font-size: 12px;
+
+        color: #555;
+
+        text-align: center;
+    }
+
+    /* ============================================================
+       UTILITIES
+    ============================================================ */
+
+    .hidden {
+        display: none !important;
+    }
+
+    .flex {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .gap-8 {
+        gap: 8px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-8 {
+        margin-top: 8px;
+    }
+
+    .mb-8 {
+        margin-bottom: 8px;
+    }
+
+    .w-full {
+        width: 100%;
+    }
+
+    .relative {
+        position: relative;
+    }
+
+    .capitalize {
+        text-transform: capitalize;
+    }
+
+    /* ============================================================
+       SCROLLBARS
+    ============================================================ */
+
+    ::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #080808;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2a2a2a;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #444;
+    }
+
+    /* ============================================================
+       MOBILE
+    ============================================================ */
+
+    @media (max-width: 650px) {
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0b0e11;
-            color: #eaecef;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        a {
-            color: #5a9cff;
-            text-decoration: none;
+            padding: 14px;
         }
 
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #2d3139;
-        }
-        .header h1 {
-            font-size: 26px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-        .header h1 span {
-            color: #5a9cff;
+            align-items: stretch;
         }
 
         .search-box {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            position: relative;
+            width: 100%;
         }
+
         .search-box input {
-            padding: 10px 16px;
-            border-radius: 8px;
-            border: 1px solid #2d3139;
-            background: #1e2329;
-            color: #eaecef;
-            font-size: 15px;
-            min-width: 220px;
-            outline: none;
-            transition: border 0.2s;
-        }
-        .search-box input:focus {
-            border-color: #5a9cff;
-        }
-        .search-box input::placeholder {
-            color: #6c7280;
-        }
-        .search-box button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            background: #5a9cff;
-            color: #fff;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .search-box button:hover {
-            background: #4a8aee;
-        }
-
-        .search-results {
-            background: #1e2329;
-            border-radius: 10px;
-            border: 1px solid #2d3139;
-            margin-top: 6px;
-            max-height: 240px;
-            overflow-y: auto;
-            display: none;
-            position: absolute;
-            width: 100%;
-            top: 100%;
-            z-index: 10;
-        }
-        .search-results .result-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid #2a2e36;
-            display: flex;
-            justify-content: space-between;
-        }
-        .search-results .result-item:hover {
-            background: #2a2e36;
-        }
-        .search-results .result-item .sym {
-            font-weight: 600;
-            color: #5a9cff;
-        }
-        .search-results .result-item .name {
-            color: #9aa0ae;
-            font-size: 14px;
-        }
-
-        /* Market Summary */
-        .market-summary {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            background: #1a1e24;
-            padding: 16px 20px;
-            border-radius: 12px;
-            border: 1px solid #2d3139;
-            margin-bottom: 24px;
-            overflow-x: auto;
-        }
-        .market-summary .index-item {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            white-space: nowrap;
-            font-size: 14px;
-        }
-        .market-summary .index-item .label {
-            color: #9aa0ae;
-        }
-        .market-summary .index-item .price {
-            font-weight: 600;
-        }
-        .market-summary .index-item .change-positive {
-            color: #0ecb81;
-        }
-        .market-summary .index-item .change-negative {
-            color: #f6465d;
-        }
-
-        /* Grid Layout */
-        .grid {
-            display: grid;
-            grid-template-columns: 3fr 2fr;
-            gap: 24px;
-        }
-        @media (max-width: 1024px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Card */
-        .card {
-            background: #1a1e24;
-            border-radius: 12px;
-            border: 1px solid #2d3139;
-            padding: 20px;
-        }
-        .card h2 {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: #d0d4dc;
-        }
-
-        /* Quote Card */
-        .quote-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .quote-header .symbol-name {
-            font-size: 22px;
-            font-weight: 600;
-        }
-        .quote-header .symbol-name .exchange {
-            font-size: 14px;
-            font-weight: 400;
-            color: #9aa0ae;
-            margin-left: 8px;
-        }
-        .quote-header .price-large {
-            font-size: 32px;
-            font-weight: 700;
-        }
-        .quote-header .change-large {
-            font-size: 20px;
-            font-weight: 500;
-            margin-left: 12px;
-        }
-        .change-positive {
-            color: #0ecb81;
-        }
-        .change-negative {
-            color: #f6465d;
-        }
-
-        .quote-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 20px;
-            margin-top: 16px;
-            font-size: 14px;
-            color: #b0b6c4;
-        }
-        .quote-details .label {
-            color: #6c7280;
-        }
-        .quote-details .value {
-            font-weight: 500;
-            color: #eaecef;
-            text-align: right;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            width: 100%;
-            height: 400px;
-            position: relative;
-            margin-top: 12px;
-            background: #13171d;
-            border-radius: 8px;
-        }
-        #chartContainer {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Time range buttons */
-        .range-buttons {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin: 12px 0 8px;
-        }
-        .range-buttons button {
-            padding: 4px 14px;
-            border-radius: 6px;
-            border: 1px solid #2d3139;
-            background: transparent;
-            color: #9aa0ae;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .range-buttons button:hover {
-            border-color: #5a9cff;
-            color: #fff;
-        }
-        .range-buttons button.active {
-            border-color: #5a9cff;
-            background: #5a9cff;
-            color: #fff;
-        }
-
-        /* Chart type toggle */
-        .chart-type-toggle {
-            display: flex;
-            gap: 6px;
-            margin-left: 12px;
-        }
-        .chart-type-toggle button {
-            padding: 4px 12px;
-            border-radius: 6px;
-            border: 1px solid #2d3139;
-            background: transparent;
-            color: #9aa0ae;
-            font-size: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .chart-type-toggle button:hover {
-            border-color: #5a9cff;
-            color: #fff;
-        }
-        .chart-type-toggle button.active {
-            border-color: #5a9cff;
-            background: #5a9cff;
-            color: #fff;
-        }
-
-        /* Popular / Movers List */
-        .movers-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .mover-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .mover-item:hover {
-            background: #252a32;
-        }
-        .mover-item .sym {
-            font-weight: 600;
-        }
-        .mover-item .name {
-            font-size: 14px;
-            color: #9aa0ae;
-            margin-left: 12px;
+            min-width: 0;
             flex: 1;
-        }
-        .mover-item .price {
-            font-weight: 500;
-            margin-right: 16px;
-        }
-        .mover-item .change {
-            font-weight: 500;
-            min-width: 70px;
-            text-align: right;
-        }
-
-        /* News */
-        .news-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .news-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #2a2e36;
-        }
-        .news-item:last-child {
-            border-bottom: none;
-        }
-        .news-item .title {
-            font-weight: 500;
-            font-size: 15px;
-            color: #d0d4dc;
-            transition: color 0.2s;
-            cursor: pointer;
-        }
-        .news-item .title:hover {
-            color: #5a9cff;
-        }
-        .news-item .meta {
-            font-size: 13px;
-            color: #6c7280;
-            margin-top: 4px;
-        }
-
-        /* Loading / Status */
-        .loading {
-            color: #6c7280;
-            font-size: 14px;
-            padding: 12px 0;
-        }
-        .error-text {
-            color: #f6465d;
-            font-size: 14px;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 40px;
-            padding-top: 16px;
-            border-top: 1px solid #2d3139;
-            font-size: 13px;
-            color: #6c7280;
-            text-align: center;
-        }
-
-        /* Utility */
-        .hidden {
-            display: none !important;
-        }
-        .flex {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .gap-8 {
-            gap: 8px;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .mt-8 {
-            margin-top: 8px;
-        }
-        .mb-8 {
-            margin-bottom: 8px;
-        }
-        .w-full {
             width: 100%;
         }
-        .relative {
-            position: relative;
+
+        .search-box button {
+            width: 90px;
         }
-        .capitalize {
-            text-transform: capitalize;
+
+        .quote-header .price-large {
+            font-size: 27px;
         }
-    </style>
+
+        .chart-container {
+            height: 330px;
+        }
+
+        .chart-type-toggle {
+            margin-left: 0;
+        }
+    }
+</style>
+```
+
 </head>
+
 <body>
 
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>📈 <span>Stock</span> Viewer</h1>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search symbol or name..." autocomplete="off" />
-                <button id="searchBtn">Search</button>
-                <div class="search-results" id="searchResults"></div>
-            </div>
-        </div>
+<div class="container">
 
-        <!-- MARKET SUMMARY -->
-        <div class="market-summary" id="marketSummary">
-            <div class="loading">Loading market data...</div>
-        </div>
+```
+<!-- HEADER -->
+<div class="header">
 
-        <!-- GRID -->
-        <div class="grid">
-            <!-- LEFT: Chart + Quote -->
-            <div>
-                <div class="card">
-                    <div class="quote-header" id="quoteHeader">
-                        <div>
-                            <span class="symbol-name" id="symbolName">AAPL <span class="exchange" id="exchangeName">NASDAQ</span></span>
-                        </div>
-                        <div>
-                            <span class="price-large" id="currentPrice">—</span>
-                            <span class="change-large" id="changeDisplay">—</span>
-                        </div>
-                    </div>
+    <div class="brand">
+        <div class="brand-mark">P</div>
 
-                    <div class="flex" style="justify-content:space-between; flex-wrap:wrap;">
-                        <div class="range-buttons" id="rangeButtons">
-                            <button data-range="1d">1D</button>
-                            <button data-range="5d">5D</button>
-                            <button data-range="1mo" class="active">1M</button>
-                            <button data-range="3mo">3M</button>
-                            <button data-range="6mo">6M</button>
-                            <button data-range="1y">1Y</button>
-                            <button data-range="5y">5Y</button>
-                        </div>
-                        <div class="chart-type-toggle" id="chartTypeToggle">
-                            <button data-type="candle" class="active">Candles</button>
-                            <button data-type="line">Line</button>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <div id="chartContainer"></div>
-                    </div>
-
-                    <div class="quote-details" id="quoteDetails">
-                        <div><span class="label">Previous Close</span></div>
-                        <div class="value" id="prevClose">—</div>
-                        <div><span class="label">Open</span></div>
-                        <div class="value" id="openPrice">—</div>
-                        <div><span class="label">Day High</span></div>
-                        <div class="value" id="dayHigh">—</div>
-                        <div><span class="label">Day Low</span></div>
-                        <div class="value" id="dayLow">—</div>
-                        <div><span class="label">52W High</span></div>
-                        <div class="value" id="weekHigh">—</div>
-                        <div><span class="label">52W Low</span></div>
-                        <div class="value" id="weekLow">—</div>
-                        <div><span class="label">Volume</span></div>
-                        <div class="value" id="volume">—</div>
-                        <div><span class="label">Market Cap</span></div>
-                        <div class="value" id="marketCap">—</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT: Movers + News -->
-            <div>
-                <div class="card" style="margin-bottom:20px;">
-                    <h2>🔥 Top Movers</h2>
-                    <div class="movers-list" id="moversList">
-                        <div class="loading">Loading movers...</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>📰 Latest News</h2>
-                    <div class="news-list" id="newsList">
-                        <div class="loading">Loading news...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            Data provided by Yahoo Finance. Updates every 15 seconds. For educational use only.
-        </div>
+        <h1>
+            Pulse <span>Stock</span>
+        </h1>
     </div>
 
-    <script>
-        // ============================================================
-        // STATE
-        // ============================================================
-        const state = {
-            symbol: 'AAPL',
-            range: '1mo',
-            chartType: 'candle', // 'candle' or 'line'
-            quoteData: null,
-            historyData: null,
-            searchResults: [],
-            chart: null,
-            candleSeries: null,
-            lineSeries: null,
-            volumeSeries: null,
-        };
+    <div class="search-box">
 
-        // DOM refs
-        const $ = id => document.getElementById(id);
-        const searchInput = $('searchInput');
-        const searchResults = $('searchResults');
-        const searchBtn = $('searchBtn');
-        const marketSummary = $('marketSummary');
-        const symbolName = $('symbolName');
-        const exchangeName = $('exchangeName');
-        const currentPrice = $('currentPrice');
-        const changeDisplay = $('changeDisplay');
-        const prevClose = $('prevClose');
-        const openPrice = $('openPrice');
-        const dayHigh = $('dayHigh');
-        const dayLow = $('dayLow');
-        const weekHigh = $('weekHigh');
-        const weekLow = $('weekLow');
-        const volume = $('volume');
-        const marketCap = $('marketCap');
-        const moversList = $('moversList');
-        const newsList = $('newsList');
-        const chartContainer = $('chartContainer');
-        const rangeButtons = $('rangeButtons');
-        const chartTypeToggle = $('chartTypeToggle');
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search symbol or company..."
+            autocomplete="off"
+        />
 
-        // ============================================================
-        // HELPERS
-        // ============================================================
-        function formatNumber(num) {
-            if (num === undefined || num === null) return '—';
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-            return num.toFixed(2);
+        <button id="searchBtn">
+            Search
+        </button>
+
+        <div
+            class="search-results"
+            id="searchResults">
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MARKET SUMMARY -->
+<div
+    class="market-summary"
+    id="marketSummary">
+
+    <div class="loading">
+        Loading market data...
+    </div>
+
+</div>
+
+
+<!-- GRID -->
+<div class="grid">
+
+    <!-- LEFT -->
+    <div>
+
+        <div class="card">
+
+            <div
+                class="quote-header"
+                id="quoteHeader">
+
+                <div>
+
+                    <span
+                        class="symbol-name"
+                        id="symbolName">
+
+                        AAPL
+
+                        <span
+                            class="exchange"
+                            id="exchangeName">
+
+                            NASDAQ
+
+                        </span>
+
+                    </span>
+
+                </div>
+
+                <div>
+
+                    <span
+                        class="price-large"
+                        id="currentPrice">
+
+                        —
+
+                    </span>
+
+                    <span
+                        class="change-large"
+                        id="changeDisplay">
+
+                        —
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="flex"
+                style="justify-content:space-between; flex-wrap:wrap;">
+
+                <div
+                    class="range-buttons"
+                    id="rangeButtons">
+
+                    <button data-range="1d">
+                        1D
+                    </button>
+
+                    <button data-range="5d">
+                        5D
+                    </button>
+
+                    <button
+                        data-range="1mo"
+                        class="active">
+
+                        1M
+
+                    </button>
+
+                    <button data-range="3mo">
+                        3M
+                    </button>
+
+                    <button data-range="6mo">
+                        6M
+                    </button>
+
+                    <button data-range="1y">
+                        1Y
+                    </button>
+
+                    <button data-range="5y">
+                        5Y
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="chart-type-toggle"
+                    id="chartTypeToggle">
+
+                    <button
+                        data-type="candle"
+                        class="active">
+
+                        Candles
+
+                    </button>
+
+                    <button data-type="line">
+                        Line
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-container">
+
+                <div id="chartContainer"></div>
+
+            </div>
+
+
+            <div
+                class="quote-details"
+                id="quoteDetails">
+
+                <div>
+                    <span class="label">
+                        Previous Close
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="prevClose">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        Open
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="openPrice">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        Day High
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="dayHigh">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        Day Low
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="dayLow">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        52W High
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="weekHigh">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        52W Low
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="weekLow">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        Volume
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="volume">
+                    —
+                </div>
+
+
+                <div>
+                    <span class="label">
+                        Market Cap
+                    </span>
+                </div>
+
+                <div
+                    class="value"
+                    id="marketCap">
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RIGHT -->
+    <div>
+
+        <div
+            class="card"
+            style="margin-bottom:20px;">
+
+            <h2>
+                Top Movers
+            </h2>
+
+            <div
+                class="movers-list"
+                id="moversList">
+
+                <div class="loading">
+                    Loading movers...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>
+                Latest News
+            </h2>
+
+            <div
+                class="news-list"
+                id="newsList">
+
+                <div class="loading">
+                    Loading news...
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+<div class="footer">
+
+    Pulse Stock · Market data provided by Yahoo Finance ·
+    Updates every 15 seconds · For educational use only.
+
+</div>
+```
+
+</div>
+
+<script>
+
+    /* ============================================================
+       STATE
+    ============================================================ */
+
+    const state = {
+        symbol: 'AAPL',
+        range: '1mo',
+        chartType: 'candle',
+
+        quoteData: null,
+        historyData: null,
+        searchResults: [],
+
+        chart: null,
+        candleSeries: null,
+        lineSeries: null,
+        volumeSeries: null
+    };
+
+
+    /* ============================================================
+       DOM
+    ============================================================ */
+
+    const $ = id => document.getElementById(id);
+
+    const searchInput = $('searchInput');
+    const searchResults = $('searchResults');
+    const searchBtn = $('searchBtn');
+
+    const marketSummary = $('marketSummary');
+
+    const symbolName = $('symbolName');
+    const exchangeName = $('exchangeName');
+
+    const currentPrice = $('currentPrice');
+    const changeDisplay = $('changeDisplay');
+
+    const prevClose = $('prevClose');
+    const openPrice = $('openPrice');
+
+    const dayHigh = $('dayHigh');
+    const dayLow = $('dayLow');
+
+    const weekHigh = $('weekHigh');
+    const weekLow = $('weekLow');
+
+    const volume = $('volume');
+    const marketCap = $('marketCap');
+
+    const moversList = $('moversList');
+    const newsList = $('newsList');
+
+    const chartContainer = $('chartContainer');
+
+    const rangeButtons = $('rangeButtons');
+    const chartTypeToggle = $('chartTypeToggle');
+
+
+    /* ============================================================
+       HELPERS
+    ============================================================ */
+
+    function formatNumber(num) {
+
+        if (num === undefined || num === null)
+            return '—';
+
+        if (num >= 1e9)
+            return (num / 1e9).toFixed(2) + 'B';
+
+        if (num >= 1e6)
+            return (num / 1e6).toFixed(2) + 'M';
+
+        if (num >= 1e3)
+            return (num / 1e3).toFixed(1) + 'K';
+
+        return Number(num).toFixed(2);
+    }
+
+
+    function formatCurrency(num) {
+
+        if (num === undefined || num === null)
+            return '—';
+
+        return '$' + Number(num).toFixed(2);
+    }
+
+
+    function formatVolume(num) {
+
+        if (num === undefined || num === null)
+            return '—';
+
+        return Number(num).toLocaleString();
+    }
+
+
+    function formatDate(ts) {
+
+        if (!ts)
+            return '';
+
+        const d = new Date(ts * 1000);
+
+        return d.toLocaleDateString();
+    }
+
+
+    function getChangeClass(val) {
+
+        if (
+            val === undefined ||
+            val === null ||
+            val === 0
+        ) {
+            return '';
         }
 
-        function formatCurrency(num) {
-            if (num === undefined || num === null) return '—';
-            return '$' + num.toFixed(2);
+        return val > 0
+            ? 'change-positive'
+            : 'change-negative';
+    }
+
+
+    function getChangeSymbol(val) {
+
+        if (
+            val === undefined ||
+            val === null ||
+            val === 0
+        ) {
+            return '';
         }
 
-        function formatVolume(num) {
-            if (num === undefined || num === null) return '—';
-            return num.toLocaleString();
+        return val > 0
+            ? '+'
+            : '−';
+    }
+
+
+    /* ============================================================
+       API
+    ============================================================ */
+
+    async function fetchAPI(endpoint) {
+
+        try {
+
+            const res = await fetch(endpoint);
+
+            if (!res.ok)
+                throw new Error(`HTTP ${res.status}`);
+
+            return await res.json();
+
+        } catch (e) {
+
+            console.warn('API error:', e);
+
+            return null;
+        }
+    }
+
+
+    async function searchTickers(query) {
+
+        if (!query)
+            return [];
+
+        const data = await fetchAPI(
+            `/api/search?q=${encodeURIComponent(query)}`
+        );
+
+        return data || [];
+    }
+
+
+    async function fetchQuote(symbol) {
+
+        return await fetchAPI(
+            `/api/quote?symbol=${encodeURIComponent(symbol)}`
+        );
+    }
+
+
+    async function fetchHistory(symbol, range) {
+
+        return await fetchAPI(
+            `/api/history?symbol=${encodeURIComponent(symbol)}&range=${range}`
+        );
+    }
+
+
+    async function fetchMarketSummary() {
+
+        return await fetchAPI(
+            '/api/market-summary'
+        );
+    }
+
+
+    async function fetchNews(symbol) {
+
+        const data = await fetchAPI(
+            `/api/news?symbol=${encodeURIComponent(symbol || '')}`
+        );
+
+        return data || [];
+    }
+
+
+    /* ============================================================
+       CHART
+    ============================================================ */
+
+    function initChart() {
+
+        if (state.chart) {
+            state.chart.remove();
         }
 
-        function formatDate(ts) {
-            if (!ts) return '';
-            const d = new Date(ts * 1000);
-            return d.toLocaleDateString();
-        }
 
-        function getChangeClass(val) {
-            if (val === undefined || val === null || val === 0) return '';
-            return val > 0 ? 'change-positive' : 'change-negative';
-        }
+        state.chart =
+            LightweightCharts.createChart(
+                chartContainer,
+                {
+                    layout: {
+                        background: {
+                            color: '#070707'
+                        },
 
-        function getChangeSymbol(val) {
-            if (val === undefined || val === null || val === 0) return '';
-            return val > 0 ? '▲' : '▼';
-        }
+                        textColor: '#777'
+                    },
 
-        function getRangeLabel(range) {
-            const map = { '1d': '1D', '5d': '5D', '1mo': '1M', '3mo': '3M', '6mo': '6M', '1y': '1Y', '5y': '5Y', 'max': 'MAX' };
-            return map[range] || range;
-        }
+                    grid: {
+                        vertLines: {
+                            color: '#111'
+                        },
 
-        // ============================================================
-        // API CALLS
-        // ============================================================
-        async function fetchAPI(endpoint) {
-            try {
-                const res = await fetch(endpoint);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return await res.json();
-            } catch (e) {
-                console.warn('API error:', e);
-                return null;
-            }
-        }
+                        horzLines: {
+                            color: '#111'
+                        }
+                    },
 
-        async function searchTickers(query) {
-            if (!query) return [];
-            const data = await fetchAPI(`/api/search?q=${encodeURIComponent(query)}`);
-            return data || [];
-        }
+                    crosshair: {
+                        mode:
+                            LightweightCharts.CrosshairMode.Normal
+                    },
 
-        async function fetchQuote(symbol) {
-            const data = await fetchAPI(`/api/quote?symbol=${encodeURIComponent(symbol)}`);
-            return data;
-        }
+                    rightPriceScale: {
+                        borderColor: '#222'
+                    },
 
-        async function fetchHistory(symbol, range) {
-            const data = await fetchAPI(`/api/history?symbol=${encodeURIComponent(symbol)}&range=${range}`);
-            return data;
-        }
+                    timeScale: {
+                        borderColor: '#222',
 
-        async function fetchMarketSummary() {
-            const data = await fetchAPI('/api/market-summary');
-            return data;
-        }
+                        timeVisible: true,
 
-        async function fetchNews(symbol) {
-            const data = await fetchAPI(`/api/news?symbol=${encodeURIComponent(symbol || '')}`);
-            return data || [];
-        }
+                        secondsVisible: false
+                    },
 
-        // ============================================================
-        // CHART SETUP
-        // ============================================================
-        function initChart() {
-            if (state.chart) {
-                state.chart.remove();
-            }
+                    width:
+                        chartContainer.clientWidth,
 
-            state.chart = LightweightCharts.createChart(chartContainer, {
-                layout: {
-                    background: { color: '#13171d' },
-                    textColor: '#9aa0ae',
-                },
-                grid: {
-                    vertLines: { color: '#1e2329' },
-                    horzLines: { color: '#1e2329' },
-                },
-                crosshair: {
-                    mode: LightweightCharts.CrosshairMode.Normal,
-                },
-                rightPriceScale: {
-                    borderColor: '#2d3139',
-                },
-                timeScale: {
-                    borderColor: '#2d3139',
-                    timeVisible: true,
-                    secondsVisible: false,
-                },
-                width: chartContainer.clientWidth,
-                height: 400,
+                    height: 400
+                }
+            );
+
+
+        /* CANDLE */
+
+        state.candleSeries =
+            state.chart.addCandlestickSeries({
+
+                upColor: '#ffffff',
+
+                downColor: '#555555',
+
+                borderUpColor: '#ffffff',
+
+                borderDownColor: '#555555',
+
+                wickUpColor: '#ffffff',
+
+                wickDownColor: '#555555'
             });
 
-            // Create candle series
-            state.candleSeries = state.chart.addCandlestickSeries({
-                upColor: '#0ecb81',
-                downColor: '#f6465d',
-                borderUpColor: '#0ecb81',
-                borderDownColor: '#f6465d',
-                wickUpColor: '#0ecb81',
-                wickDownColor: '#f6465d',
-            });
 
-            // Create line series (hidden by default)
-            state.lineSeries = state.chart.addLineSeries({
-                color: '#5a9cff',
+        /* LINE */
+
+        state.lineSeries =
+            state.chart.addLineSeries({
+
+                color: '#ffffff',
+
                 lineWidth: 2,
-                priceLineVisible: false,
-            });
-            state.lineSeries.applyOptions({
-                visible: false,
+
+                priceLineVisible: false
             });
 
-            // Create volume series
-            state.volumeSeries = state.chart.addHistogramSeries({
-                color: '#2d3139',
+
+        state.lineSeries.applyOptions({
+            visible: false
+        });
+
+
+        /* VOLUME */
+
+        state.volumeSeries =
+            state.chart.addHistogramSeries({
+
+                color: '#2a2a2a',
+
                 priceFormat: {
-                    type: 'volume',
+                    type: 'volume'
                 },
-                priceScaleId: 'volume',
+
+                priceScaleId: 'volume'
             });
 
-            // Volume scale
-            state.chart.priceScale('volume').applyOptions({
+
+        state.chart
+            .priceScale('volume')
+            .applyOptions({
+
                 scaleMargins: {
-                    top: 0.85,
-                    bottom: 0,
+                    top: .85,
+                    bottom: 0
                 },
+
                 visible: true,
-                borderColor: '#2d3139',
+
+                borderColor: '#222'
             });
 
-            // Main scale margins
-            state.chart.priceScale('right').applyOptions({
+
+        state.chart
+            .priceScale('right')
+            .applyOptions({
+
                 scaleMargins: {
-                    top: 0.05,
-                    bottom: 0.15,
-                },
+                    top: .05,
+                    bottom: .15
+                }
             });
 
-            // Fit content
-            state.chart.timeScale().fitContent();
 
-            // Handle resize
-            const resizeObserver = new ResizeObserver(() => {
+        state.chart
+            .timeScale()
+            .fitContent();
+
+
+        const resizeObserver =
+            new ResizeObserver(() => {
+
                 state.chart.applyOptions({
-                    width: chartContainer.clientWidth,
+                    width:
+                        chartContainer.clientWidth
                 });
-            });
-            resizeObserver.observe(chartContainer);
 
-            return state.chart;
-        }
-
-        function updateChart(candles, chartType) {
-            if (!state.chart) {
-                initChart();
-            }
-
-            if (!candles || candles.length === 0) {
-                state.candleSeries.setData([]);
-                state.lineSeries.setData([]);
-                state.volumeSeries.setData([]);
-                return;
-            }
-
-            // Format data for lightweight charts
-            const candleData = candles.map(c => ({
-                time: c.time,
-                open: c.open,
-                high: c.high,
-                low: c.low,
-                close: c.close,
-            }));
-
-            const lineData = candles.map(c => ({
-                time: c.time,
-                value: c.close,
-            }));
-
-            const volumeData = candles.map(c => ({
-                time: c.time,
-                value: c.volume || 0,
-                color: c.close >= c.open ? '#0ecb81' : '#f6465d',
-            }));
-
-            // Update series
-            state.candleSeries.setData(candleData);
-            state.lineSeries.setData(lineData);
-            state.volumeSeries.setData(volumeData);
-
-            // Show/hide based on chart type
-            if (chartType === 'candle') {
-                state.candleSeries.applyOptions({ visible: true });
-                state.lineSeries.applyOptions({ visible: false });
-            } else {
-                state.candleSeries.applyOptions({ visible: false });
-                state.lineSeries.applyOptions({ visible: true });
-            }
-
-            state.chart.timeScale().fitContent();
-        }
-
-        // ============================================================
-        // RENDER FUNCTIONS
-        // ============================================================
-
-        function renderQuote(data) {
-            if (!data || data.error) {
-                currentPrice.textContent = '—';
-                changeDisplay.textContent = '—';
-                return;
-            }
-            state.quoteData = data;
-            const sym = data.symbol || state.symbol;
-            symbolName.innerHTML = `${sym} <span class="exchange">${data.exchangeName || ''}</span>`;
-            currentPrice.textContent = formatCurrency(data.price);
-            const chg = data.change || 0;
-            const chgPct = data.changePercent || 0;
-            const chgText = `${getChangeSymbol(chg)} ${formatCurrency(Math.abs(chg))} (${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%)`;
-            changeDisplay.textContent = chgText;
-            changeDisplay.className = `change-large ${getChangeClass(chg)}`;
-
-            prevClose.textContent = formatCurrency(data.previousClose);
-            openPrice.textContent = formatCurrency(data.open);
-            dayHigh.textContent = formatCurrency(data.dayHigh);
-            dayLow.textContent = formatCurrency(data.dayLow);
-            weekHigh.textContent = formatCurrency(data.fiftyTwoWeekHigh);
-            weekLow.textContent = formatCurrency(data.fiftyTwoWeekLow);
-            volume.textContent = formatVolume(data.volume);
-            marketCap.textContent = data.marketCap ? formatNumber(data.marketCap) : '—';
-        }
-
-        function renderHistory(data) {
-            if (!data || data.error || !data.candles || data.candles.length === 0) {
-                updateChart([], state.chartType);
-                return;
-            }
-            state.historyData = data;
-            updateChart(data.candles, state.chartType);
-        }
-
-        function renderMarketSummary(data) {
-            if (!data || !data.indices) {
-                marketSummary.innerHTML = '<span style="color:#6c7280;">No market data</span>';
-                return;
-            }
-            let html = '';
-            data.indices.forEach(idx => {
-                const cls = getChangeClass(idx.change);
-                const sign = idx.change >= 0 ? '+' : '';
-                html += `
-                    <div class="index-item">
-                        <span class="label">${idx.name}</span>
-                        <span class="price">${formatCurrency(idx.price)}</span>
-                        <span class="${cls}">${sign}${(idx.changePercent || 0).toFixed(2)}%</span>
-                    </div>
-                `;
-            });
-            marketSummary.innerHTML = html;
-        }
-
-        function renderMovers(data) {
-            if (!data || !data.popular || data.popular.length === 0) {
-                moversList.innerHTML = '<div class="loading">No movers data</div>';
-                return;
-            }
-            let html = '';
-            data.popular.forEach(item => {
-                const cls = getChangeClass(item.change);
-                const sign = item.change >= 0 ? '+' : '';
-                html += `
-                    <div class="mover-item" data-symbol="${item.symbol}">
-                        <span class="sym">${item.symbol}</span>
-                        <span class="name">${item.name || item.symbol}</span>
-                        <span class="price">${formatCurrency(item.price)}</span>
-                        <span class="change ${cls}">${sign}${(item.changePercent || 0).toFixed(2)}%</span>
-                    </div>
-                `;
-            });
-            moversList.innerHTML = html;
-            moversList.querySelectorAll('.mover-item').forEach(el => {
-                el.addEventListener('click', () => {
-                    const sym = el.dataset.symbol;
-                    if (sym) loadSymbol(sym);
-                });
-            });
-        }
-
-        function renderNews(data) {
-            if (!data || data.length === 0) {
-                newsList.innerHTML = '<div class="loading">No news available</div>';
-                return;
-            }
-            let html = '';
-            data.slice(0, 6).forEach(n => {
-                const timeStr = n.providerPublishTime ? formatDate(n.providerPublishTime) : '';
-                html += `
-                    <div class="news-item">
-                        <div class="title" onclick="window.open('${n.link || '#'}', '_blank')">${n.title || 'News'}</div>
-                        <div class="meta">${n.publisher || ''} ${timeStr ? '· ' + timeStr : ''}</div>
-                    </div>
-                `;
-            });
-            newsList.innerHTML = html;
-        }
-
-        // ============================================================
-        // LOAD SYMBOL
-        // ============================================================
-        async function loadSymbol(symbol) {
-            if (!symbol) return;
-            state.symbol = symbol;
-            searchInput.value = symbol;
-
-            // Update quote
-            const quote = await fetchQuote(symbol);
-            renderQuote(quote);
-
-            // Update history
-            const history = await fetchHistory(symbol, state.range);
-            renderHistory(history);
-
-            // Update news
-            const news = await fetchNews(symbol);
-            renderNews(news);
-
-            // Highlight active range button
-            rangeButtons.querySelectorAll('button').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.range === state.range);
             });
 
-            // Highlight active chart type
-            chartTypeToggle.querySelectorAll('button').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.type === state.chartType);
-            });
-        }
 
-        // ============================================================
-        // SEARCH
-        // ============================================================
-        async function performSearch() {
-            const query = searchInput.value.trim();
-            if (!query) {
-                searchResults.style.display = 'none';
-                return;
-            }
-            const results = await searchTickers(query);
-            state.searchResults = results;
-            if (results.length === 0) {
-                searchResults.style.display = 'none';
-                return;
-            }
-            let html = '';
-            results.slice(0, 10).forEach(item => {
-                html += `
-                    <div class="result-item" data-symbol="${item.symbol}">
-                        <span class="sym">${item.symbol}</span>
-                        <span class="name">${item.name || item.symbol} ${item.exchange ? '· ' + item.exchange : ''}</span>
-                    </div>
-                `;
-            });
-            searchResults.innerHTML = html;
-            searchResults.style.display = 'block';
+        resizeObserver.observe(chartContainer);
+    }
 
-            searchResults.querySelectorAll('.result-item').forEach(el => {
-                el.addEventListener('click', () => {
-                    const sym = el.dataset.symbol;
-                    if (sym) {
-                        loadSymbol(sym);
-                        searchResults.style.display = 'none';
-                    }
-                });
-            });
-        }
 
-        // ============================================================
-        // INIT
-        // ============================================================
-        async function init() {
-            // Initialize chart
+    function updateChart(candles, chartType) {
+
+        if (!state.chart) {
             initChart();
-
-            // Load market summary
-            const summary = await fetchMarketSummary();
-            renderMarketSummary(summary);
-            renderMovers(summary);
-
-            // Load default symbol
-            await loadSymbol('AAPL');
-
-            // Set up search
-            searchBtn.addEventListener('click', performSearch);
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') performSearch();
-            });
-            searchInput.addEventListener('blur', () => {
-                setTimeout(() => { searchResults.style.display = 'none'; }, 200);
-            });
-            searchInput.addEventListener('focus', () => {
-                if (state.searchResults.length > 0) {
-                    searchResults.style.display = 'block';
-                }
-            });
-
-            // Range buttons
-            rangeButtons.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const range = btn.dataset.range;
-                    if (range === state.range) return;
-                    state.range = range;
-                    const history = await fetchHistory(state.symbol, range);
-                    renderHistory(history);
-                    rangeButtons.querySelectorAll('button').forEach(b => b.classList.toggle('active', b
-                        .dataset.range === range));
-                });
-            });
-
-            // Chart type toggle
-            chartTypeToggle.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const type = btn.dataset.type;
-                    if (type === state.chartType) return;
-                    state.chartType = type;
-                    chartTypeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b
-                        .dataset.type === type));
-
-                    // Update chart visibility
-                    if (state.historyData && state.historyData.candles) {
-                        updateChart(state.historyData.candles, type);
-                    }
-                });
-            });
-
-            // Auto-refresh quote every 15 seconds
-            setInterval(async () => {
-                const quote = await fetchQuote(state.symbol);
-                renderQuote(quote);
-            }, 15000);
-
-            // Refresh market summary every 30 seconds
-            setInterval(async () => {
-                const summary = await fetchMarketSummary();
-                renderMarketSummary(summary);
-                renderMovers(summary);
-            }, 30000);
-
-            // Handle resize for chart
-            window.addEventListener('resize', () => {
-                if (state.chart) {
-                    state.chart.applyOptions({
-                        width: chartContainer.clientWidth,
-                    });
-                }
-            });
         }
 
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+
+        if (
+            !candles ||
+            candles.length === 0
+        ) {
+
+            state.candleSeries.setData([]);
+            state.lineSeries.setData([]);
+            state.volumeSeries.setData([]);
+
+            return;
+        }
+
+
+        const candleData =
+            candles.map(c => ({
+
+                time: c.time,
+
+                open: c.open,
+
+                high: c.high,
+
+                low: c.low,
+
+                close: c.close
+
+            }));
+
+
+        const lineData =
+            candles.map(c => ({
+
+                time: c.time,
+
+                value: c.close
+
+            }));
+
+
+        const volumeData =
+            candles.map(c => ({
+
+                time: c.time,
+
+                value: c.volume || 0,
+
+                color:
+                    c.close >= c.open
+                        ? '#777'
+                        : '#292929'
+
+            }));
+
+
+        state.candleSeries
+            .setData(candleData);
+
+        state.lineSeries
+            .setData(lineData);
+
+        state.volumeSeries
+            .setData(volumeData);
+
+
+        if (chartType === 'candle') {
+
+            state.candleSeries.applyOptions({
+                visible: true
+            });
+
+            state.lineSeries.applyOptions({
+                visible: false
+            });
+
+        } else {
+
+            state.candleSeries.applyOptions({
+                visible: false
+            });
+
+            state.lineSeries.applyOptions({
+                visible: true
+            });
+
+        }
+
+
+        state.chart
+            .timeScale()
+            .fitContent();
+    }
+
+
+    /* ============================================================
+       RENDER QUOTE
+    ============================================================ */
+
+    function renderQuote(data) {
+
+        if (!data || data.error) {
+
+            currentPrice.textContent = '—';
+            changeDisplay.textContent = '—';
+
+            return;
+        }
+
+
+        state.quoteData = data;
+
+
+        const sym =
+            data.symbol ||
+            state.symbol;
+
+
+        symbolName.innerHTML =
+            `${sym}
+             <span class="exchange">
+                ${data.exchangeName || ''}
+             </span>`;
+
+
+        currentPrice.textContent =
+            formatCurrency(data.price);
+
+
+        const chg =
+            data.change || 0;
+
+
+        const chgPct =
+            data.changePercent || 0;
+
+
+        const sign =
+            chgPct >= 0
+                ? '+'
+                : '−';
+
+
+        const chgText =
+            `${getChangeSymbol(chg)}
+             ${formatCurrency(Math.abs(chg))}
+             (${sign}${Math.abs(chgPct).toFixed(2)}%)`;
+
+
+        changeDisplay.textContent =
+            chgText;
+
+
+        changeDisplay.className =
+            `change-large ${getChangeClass(chg)}`;
+
+
+        prevClose.textContent =
+            formatCurrency(data.previousClose);
+
+        openPrice.textContent =
+            formatCurrency(data.open);
+
+        dayHigh.textContent =
+            formatCurrency(data.dayHigh);
+
+        dayLow.textContent =
+            formatCurrency(data.dayLow);
+
+        weekHigh.textContent =
+            formatCurrency(data.fiftyTwoWeekHigh);
+
+        weekLow.textContent =
+            formatCurrency(data.fiftyTwoWeekLow);
+
+        volume.textContent =
+            formatVolume(data.volume);
+
+        marketCap.textContent =
+            data.marketCap
+                ? formatNumber(data.marketCap)
+                : '—';
+    }
+
+
+    /* ============================================================
+       HISTORY
+    ============================================================ */
+
+    function renderHistory(data) {
+
+        if (
+            !data ||
+            data.error ||
+            !data.candles ||
+            data.candles.length === 0
+        ) {
+
+            updateChart(
+                [],
+                state.chartType
+            );
+
+            return;
+        }
+
+
+        state.historyData = data;
+
+        updateChart(
+            data.candles,
+            state.chartType
+        );
+    }
+
+
+    /* ============================================================
+       MARKET SUMMARY
+    ============================================================ */
+
+    function renderMarketSummary(data) {
+
+        if (
+            !data ||
+            !data.indices
+        ) {
+
+            marketSummary.innerHTML =
+                '<span style="color:#555;">No market data</span>';
+
+            return;
+        }
+
+
+        let html = '';
+
+
+        data.indices.forEach(idx => {
+
+            const cls =
+                getChangeClass(idx.change);
+
+
+            const sign =
+                idx.change >= 0
+                    ? '+'
+                    : '−';
+
+
+            html += `
+
+                <div class="index-item">
+
+                    <span class="label">
+                        ${idx.name}
+                    </span>
+
+                    <span class="price">
+                        ${formatCurrency(idx.price)}
+                    </span>
+
+                    <span class="${cls}">
+                        ${sign}${Math.abs(
+                            idx.changePercent || 0
+                        ).toFixed(2)}%
+                    </span>
+
+                </div>
+
+            `;
+
+        });
+
+
+        marketSummary.innerHTML =
+            html;
+    }
+
+
+    /* ============================================================
+       MOVERS
+    ============================================================ */
+
+    function renderMovers(data) {
+
+        if (
+            !data ||
+            !data.popular ||
+            data.popular.length === 0
+        ) {
+
+            moversList.innerHTML =
+                '<div class="loading">No movers data</div>';
+
+            return;
+        }
+
+
+        let html = '';
+
+
+        data.popular.forEach(item => {
+
+            const cls =
+                getChangeClass(item.change);
+
+
+            const sign =
+                item.change >= 0
+                    ? '+'
+                    : '−';
+
+
+            html += `
+
+                <div
+                    class="mover-item"
+                    data-symbol="${item.symbol}">
+
+                    <span class="sym">
+                        ${item.symbol}
+                    </span>
+
+                    <span class="name">
+                        ${item.name || item.symbol}
+                    </span>
+
+                    <span class="price">
+                        ${formatCurrency(item.price)}
+                    </span>
+
+                    <span class="change ${cls}">
+                        ${sign}${Math.abs(
+                            item.changePercent || 0
+                        ).toFixed(2)}%
+                    </span>
+
+                </div>
+
+            `;
+
+        });
+
+
+        moversList.innerHTML =
+            html;
+
+
+        moversList
+            .querySelectorAll('.mover-item')
+            .forEach(el => {
+
+                el.addEventListener(
+                    'click',
+                    () => {
+
+                        const sym =
+                            el.dataset.symbol;
+
+                        if (sym)
+                            loadSymbol(sym);
+
+                    }
+                );
+
+            });
+    }
+
+
+    /* ============================================================
+       NEWS
+    ============================================================ */
+
+    function renderNews(data) {
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
+            newsList.innerHTML =
+                '<div class="loading">No news available</div>';
+
+            return;
+        }
+
+
+        let html = '';
+
+
+        data
+            .slice(0, 6)
+            .forEach(n => {
+
+                const timeStr =
+                    n.providerPublishTime
+                        ? formatDate(
+                            n.providerPublishTime
+                        )
+                        : '';
+
+
+                html += `
+
+                    <div class="news-item">
+
+                        <div
+                            class="title"
+                            onclick="window.open(
+                                '${n.link || '#'}',
+                                '_blank'
+                            )">
+
+                            ${n.title || 'News'}
+
+                        </div>
+
+                        <div class="meta">
+
+                            ${n.publisher || ''}
+
+                            ${
+                                timeStr
+                                    ? ' · ' + timeStr
+                                    : ''
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+
+        newsList.innerHTML =
+            html;
+    }
+
+
+    /* ============================================================
+       LOAD SYMBOL
+    ============================================================ */
+
+    async function loadSymbol(symbol) {
+
+        if (!symbol)
+            return;
+
+
+        state.symbol =
+            symbol;
+
+
+        searchInput.value =
+            symbol;
+
+
+        const quote =
+            await fetchQuote(symbol);
+
+
+        renderQuote(quote);
+
+
+        const history =
+            await fetchHistory(
+                symbol,
+                state.range
+            );
+
+
+        renderHistory(history);
+
+
+        const news =
+            await fetchNews(symbol);
+
+
+        renderNews(news);
+
+
+        rangeButtons
+            .querySelectorAll('button')
+            .forEach(btn => {
+
+                btn.classList.toggle(
+                    'active',
+                    btn.dataset.range ===
+                    state.range
+                );
+
+            });
+
+
+        chartTypeToggle
+            .querySelectorAll('button')
+            .forEach(btn => {
+
+                btn.classList.toggle(
+                    'active',
+                    btn.dataset.type ===
+                    state.chartType
+                );
+
+            });
+    }
+
+
+    /* ============================================================
+       SEARCH
+    ============================================================ */
+
+    async function performSearch() {
+
+        const query =
+            searchInput.value.trim();
+
+
+        if (!query) {
+
+            searchResults.style.display =
+                'none';
+
+            return;
+        }
+
+
+        const results =
+            await searchTickers(query);
+
+
+        state.searchResults =
+            results;
+
+
+        if (
+            results.length === 0
+        ) {
+
+            searchResults.style.display =
+                'none';
+
+            return;
+        }
+
+
+        let html = '';
+
+
+        results
+            .slice(0, 10)
+            .forEach(item => {
+
+                html += `
+
+                    <div
+                        class="result-item"
+                        data-symbol="${item.symbol}">
+
+                        <span class="sym">
+                            ${item.symbol}
+                        </span>
+
+                        <span class="name">
+
+                            ${item.name || item.symbol}
+
+                            ${
+                                item.exchange
+                                    ? ' · ' +
+                                      item.exchange
+                                    : ''
+                            }
+
+                        </span>
+
+                    </div>
+
+                `;
+
+            });
+
+
+        searchResults.innerHTML =
+            html;
+
+
+        searchResults.style.display =
+            'block';
+
+
+        searchResults
+            .querySelectorAll('.result-item')
+            .forEach(el => {
+
+                el.addEventListener(
+                    'click',
+                    () => {
+
+                        const sym =
+                            el.dataset.symbol;
+
+                        if (sym) {
+
+                            loadSymbol(sym);
+
+                            searchResults.style.display =
+                                'none';
+                        }
+
+                    }
+                );
+
+            });
+    }
+
+
+    /* ============================================================
+       INIT
+    ============================================================ */
+
+    async function init() {
+
+        initChart();
+
+
+        const summary =
+            await fetchMarketSummary();
+
+
+        renderMarketSummary(
+            summary
+        );
+
+
+        renderMovers(
+            summary
+        );
+
+
+        await loadSymbol(
+            'AAPL'
+        );
+
+
+        /* SEARCH */
+
+        searchBtn.addEventListener(
+            'click',
+            performSearch
+        );
+
+
+        searchInput.addEventListener(
+            'keydown',
+            e => {
+
+                if (e.key === 'Enter')
+                    performSearch();
+
+            }
+        );
+
+
+        searchInput.addEventListener(
+            'blur',
+            () => {
+
+                setTimeout(
+                    () => {
+
+                        searchResults.style.display =
+                            'none';
+
+                    },
+                    200
+                );
+
+            }
+        );
+
+
+        searchInput.addEventListener(
+            'focus',
+            () => {
+
+                if (
+                    state.searchResults.length > 0
+                ) {
+
+                    searchResults.style.display =
+                        'block';
+
+                }
+
+            }
+        );
+
+
+        /* RANGE */
+
+        rangeButtons
+            .querySelectorAll('button')
+            .forEach(btn => {
+
+                btn.addEventListener(
+                    'click',
+                    async () => {
+
+                        const range =
+                            btn.dataset.range;
+
+
+                        if (
+                            range ===
+                            state.range
+                        )
+                            return;
+
+
+                        state.range =
+                            range;
+
+
+                        const history =
+                            await fetchHistory(
+                                state.symbol,
+                                range
+                            );
+
+
+                        renderHistory(
+                            history
+                        );
+
+
+                        rangeButtons
+                            .querySelectorAll('button')
+                            .forEach(b =>
+                                b.classList.toggle(
+                                    'active',
+                                    b.dataset.range ===
+                                    range
+                                )
+                            );
+
+                    }
+                );
+
+            });
+
+
+        /* CHART TYPE */
+
+        chartTypeToggle
+            .querySelectorAll('button')
+            .forEach(btn => {
+
+                btn.addEventListener(
+                    'click',
+                    () => {
+
+                        const type =
+                            btn.dataset.type;
+
+
+                        if (
+                            type ===
+                            state.chartType
+                        )
+                            return;
+
+
+                        state.chartType =
+                            type;
+
+
+                        chartTypeToggle
+                            .querySelectorAll('button')
+                            .forEach(b =>
+                                b.classList.toggle(
+                                    'active',
+                                    b.dataset.type ===
+                                    type
+                                )
+                            );
+
+
+                        if (
+                            state.historyData &&
+                            state.historyData.candles
+                        ) {
+
+                            updateChart(
+                                state.historyData.candles,
+                                type
+                            );
+
+                        }
+
+                    }
+                );
+
+            });
+
+
+        /* QUOTE REFRESH */
+
+        setInterval(
+            async () => {
+
+                const quote =
+                    await fetchQuote(
+                        state.symbol
+                    );
+
+                renderQuote(
+                    quote
+                );
+
+            },
+            15000
+        );
+
+
+        /* MARKET REFRESH */
+
+        setInterval(
+            async () => {
+
+                const summary =
+                    await fetchMarketSummary();
+
+                renderMarketSummary(
+                    summary
+                );
+
+                renderMovers(
+                    summary
+                );
+
+            },
+            30000
+        );
+
+
+        /* RESIZE */
+
+        window.addEventListener(
+            'resize',
+            () => {
+
+                if (state.chart) {
+
+                    state.chart.applyOptions({
+                        width:
+                            chartContainer.clientWidth
+                    });
+
+                }
+
+            }
+        );
+    }
+
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        init
+    );
+
+</script>
+
 </body>
 </html>
