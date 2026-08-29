@@ -1,62 +1,68 @@
-# 📈 StockPulse — Free Stock Viewer & Real-Time Market Terminal
+📈 StockPulse — Free Stock Viewer & Real-Time Market Terminal
+StockPulse is a free, fast, and easy-to-use stock market dashboard that brings live market data right to your browser—no credit card, no hidden fees, no paid API keys required.
 
-**StockPulse** is a lightweight, responsive, and completely free-to-use web-based stock market viewer and analytics dashboard. It allows anyone to search equities, view live/historical stock prices, interact with candlestick and area charts, inspect fundamental metrics, track market movers, manage a watchlist, and read financial news without requiring paid API keys.
+Whether you're casually checking how your favorite stocks are doing or digging deeper into price trends, StockPulse has you covered. You can search for any stock, ETF, or crypto pair, view interactive charts, track market movers, save a personal watchlist, and catch up on the latest financial news—all from one clean, dark-themed interface.
 
----
+✨ What You Can Do
+Get real-time and historical stock data — including current price, daily high/low, open, previous close, trading volume, 52-week range, and market cap.
 
-## ✨ Features
+Choose your time horizon — quickly switch between 1D, 5D, 1M, 3M, 6M, 1Y, 5Y, or MAX views.
 
-- **100% Free Live & Historical Market Data**: Real-time quotes, day high/low, open, previous close, volume, 52-week ranges, and market capitalization.
-- **Dynamic Timeframes**: `1D`, `5D`, `1M`, `3M`, `6M`, `1Y`, `5Y`, and `MAX`.
-- **Interactive Canvas Chart Engine**:
-  - Toggle between **Area / Line** and **Candlestick** chart modes.
-  - Optional **SMA 20** (Simple Moving Average) trend overlay.
-  - Dynamic Volume histogram bars colored according to candle direction.
-  - Interactive crosshairs and hovering HUD with exact OHLCV details.
-- **Top Market Ticker Ribbon**: Live index benchmarks (S&P 500, Dow Jones, Nasdaq, Russell 2000, Bitcoin, Gold, Crude Oil).
-- **Search Autocomplete**: Fast lookup across US & global stocks, ETFs, crypto pairs, and indices.
-- **Active Market Movers**: Instant tabbed switching between **Top Gainers**, **Top Losers**, and **Popular** equities.
-- **Persistent Watchlist**: 1-click star / unstar stocks with automatic browser `localStorage` persistence.
-- **Live Financial News**: Automatically loads recent market and ticker-specific headlines with direct links.
-- **Data Export**: Export historical candle data to CSV with 1 click.
-- **Dark / OLED Trading Aesthetics**: Modern neon accents, clean typography (Plus Jakarta Sans & JetBrains Mono), and responsive mobile/desktop layout.
+Explore interactive charts built with HTML5 Canvas:
 
----
+Toggle between Area/Line and Candlestick views.
 
-## 🚀 How to Run
+Add a 20-day Simple Moving Average (SMA) overlay to spot trends.
 
-### Option 1: 1-Click Batch File (Windows)
-Double-click `run.bat` in the project directory. It will activate the virtual environment and start the server.
+See volume as colored histogram bars that match each candle's direction.
 
-### Option 2: Command Line
+Hover anywhere on the chart to see exact OHLCV (Open, High, Low, Close, Volume) values.
 
-```bash
-# 1. Navigate to the project directory
+Watch major market indices in the ticker ribbon at the top — S&P 500, Dow Jones, Nasdaq, Russell 2000, Bitcoin, Gold, and Crude Oil.
+
+Search instantly with autocomplete — works for US and global stocks, ETFs, crypto pairs, and indices.
+
+Track what's moving the market — with one-click tabs for Top Gainers, Top Losers, and Most Popular stocks.
+
+Build your watchlist — star your favorite stocks with a single click, and they'll stay saved in your browser (thanks to localStorage).
+
+Read the latest financial news — headlines load automatically and link directly to full articles.
+
+Download data — export historical OHLCV data to CSV with one click.
+
+Enjoy a sleek, trader-friendly interface — dark/OLED aesthetics with neon accents, clean fonts (Plus Jakarta Sans & JetBrains Mono), and a responsive layout that works great on both desktop and mobile.
+
+🚀 How to Get Started
+Option 1: One-Click (Windows)
+Just double-click run.bat in the project folder. It'll handle the virtual environment and launch the server for you.
+
+Option 2: Manual (Command Line)
+bash
+# 1. Go to the project folder
 cd /d "%USERPROFILE%\Downloads\StockPulse"
 
-# 2. Activate virtual environment
+# 2. Activate the virtual environment
 .\venv\Scripts\activate
 
-# 3. Start the application
+# 3. Start the app
 python app.py
-```
+Then open your browser and visit:
+👉 http://localhost:5000
 
-Open your browser at:
-👉 **`http://localhost:5000`**
+🔌 API Endpoints (for the curious)
+GET /api/quote?symbol=AAPL — Get a real-time quote and key metrics for a ticker.
 
----
+GET /api/history?symbol=AAPL&range=1mo&interval=1d — Get historical OHLCV candle data.
 
-## 🔌 API Endpoints
+GET /api/search?q=apple — Autocomplete ticker suggestions as you type.
 
-- `GET /api/quote?symbol=AAPL` — Real-time price quote and key fundamental metrics.
-- `GET /api/history?symbol=AAPL&range=1mo&interval=1d` — Historical OHLCV candle data.
-- `GET /api/search?q=apple` — Autocomplete ticker suggestions.
-- `GET /api/market-summary` — Major indices and active market movers.
-- `GET /api/news?symbol=AAPL` — Recent financial news articles.
+GET /api/market-summary — Get major index values and top movers.
 
----
+GET /api/news?symbol=AAPL — Get recent news articles for a ticker.
 
-## 🛠️ Tech Stack
+🛠️ Built With
+Backend: Python, Flask, Flask-CORS, Requests
 
-- **Backend**: Python, Flask, Flask-CORS, Requests
-- **Frontend**: HTML5, Tailwind CSS, Lucide Icons, Custom High-Performance HTML5 Canvas Chart Engine
+Frontend: HTML5, Tailwind CSS, Lucide Icons, and a custom high-performance Canvas chart engine built from scratch
+
+StockPulse is made for people who want to stay informed without the hassle. No subscriptions. No noise. Just clean, real-time market data at your fingertips.
