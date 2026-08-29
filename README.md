@@ -32,7 +32,7 @@ Double-click `run.bat` in the project directory. It will activate the virtual en
 
 ```bash
 # 1. Navigate to the project directory
-cd C:\Users\mhumm\.gemini\antigravity\scratch\stock-viewer
+cd /d "%USERPROFILE%\Downloads\StockPulse"
 
 # 2. Activate virtual environment
 .\venv\Scripts\activate
